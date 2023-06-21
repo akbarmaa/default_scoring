@@ -1,0 +1,83 @@
+select *
+from AdventureWorksDW2019.dbo.FactProductInventory I
+left join AdventureWorksDW2019.dbo.DimProduct P on I.ProductKey = P.ProductKey
+left join AdventureWorksDW2019.dbo.DimProductSubcategory PS on P.ProductSubcategoryKey = PS.ProductSubcategoryKey
+left join AdventureWorksDW2019.dbo.DimProductCategory PC on PS.ProductCategoryKey = PC.ProductCategoryKey
+left join AdventureWorksDW2019.dbo.DimDate D on I.DateKey = I.DateKey
+
+select *
+from AdventureWorksDW2019.dbo.FactProductInventory I
+left join AdventureWorksDW2019.dbo.DimProduct P on I.ProductKey = P.ProductKey
+
+select i.ProductKey,
+P.ProductKey,
+PS.ProductSubcategoryKey,
+D.DateKey,
+i.UnitsIn,
+i.UnitsBalance,
+P.EnglishProductName,
+PC.ProductCategoryKey
+from AdventureWorksDW2019.dbo.FactProductInventory I
+left join AdventureWorksDW2019.dbo.DimProduct P on I.ProductKey = P.ProductKey
+left join AdventureWorksDW2019.dbo.DimProductSubcategory PS on P.ProductSubcategoryKey = PS.ProductSubcategoryKey
+left join AdventureWorksDW2019.dbo.DimProductCategory PC on PS.ProductCategoryKey = PC.ProductCategoryKey
+left join AdventureWorksDW2019.dbo.DimDate D on I.DateKey = D.DateKey
+where ps.ProductSubcategoryKey is not null
+and pc.ProductCategoryKey is not null
+
+
+--create view
+
+create view AWProduct
+as
+select i.ProductKey,
+PS.ProductSubcategoryKey,
+D.DateKey,
+i.UnitsIn,
+i.UnitsBalance,
+P.EnglishProductName,
+PC.ProductCategoryKey
+from AdventureWorksDW2019.dbo.FactProductInventory I
+left join AdventureWorksDW2019.dbo.DimProduct P on I.ProductKey = P.ProductKey
+left join AdventureWorksDW2019.dbo.DimProductSubcategory PS on P.ProductSubcategoryKey = PS.ProductSubcategoryKey
+left join AdventureWorksDW2019.dbo.DimProductCategory PC on PS.ProductCategoryKey = PC.ProductCategoryKey
+left join AdventureWorksDW2019.dbo.DimDate D on I.DateKey = D.DateKey
+where ps.ProductSubcategoryKey is not null
+and pc.ProductCategoryKey is not null
+GO
+
+--create table
+
+select *
+into DimAWProduct
+from dbo.AWProduct
+
+
+--create procedure
+
+create procedure SPawproduct
+as
+begin
+delete DimAWProduct
+insert into DimAWProduct
+(ProductKey,
+ProductSubcategoryKey,
+DateKey,
+UnitsIn,
+UnitsBalance,
+EnglishProductName,
+ProductCategoryKey)
+
+select
+ProductKey,
+ProductSubcategoryKey,
+DateKey,
+UnitsIn,
+UnitsBalance,
+EnglishProductName,
+ProductCategoryKey
+from AWProduct
+end
+exec SPawproduct;
+
+
